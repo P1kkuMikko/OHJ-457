@@ -1,43 +1,79 @@
-document.addEventListener('DOMContentLoaded', () => {
-    let points = 0;
-    let pointsPerClick = 1;
-    let clickLevel = 1;
-    let autoClickLevel = 0;
+let pisteet = 0;
+let pisteetPerKlikki = 1;
+let kehitäKlikkiHinta = 25;
+let kehitäAutoklikkiHinta = 50;
+let autoklikkiInterval;
+let autoklikinTaso = 0;
+let autoklikkiAika = 1000;
+const maksimiKlikkiTaso = 10;
+const maksimiAutoklikkiTaso = 10;
 
-    const pointsDisplay = document.getElementById('pisteet');
-    const pointsPerClickDisplay = document.getElementById('pisteetPerKlikki');
-    const clickButton = document.getElementById('klikki');
-    const upgradeClickButton = document.getElementById('kehitä');
-    const autoClickButton = document.getElementById('autoklikki');
-    const clickLevelDisplay = document.getElementById('kehitäTaso');
-    const autoClickLevelDisplay = document.getElementById('autoklikkiTaso');
+const pisteetElementti = document.getElementById('pisteet');
+const pisteetPerKlikkiElementti = document.getElementById('pisteetPerKlikki');
+const klikkaaNappi = document.getElementById('klikki');
+const kehitäKlikkiNappi = document.getElementById('kehitä');
+const kehitäAutoklikkiNappi = document.getElementById('autoklikki');
+const kehitäTasoElementti = document.getElementById('kehitäTaso');
+const autoklikkiTasoElementti = document.getElementById('autoklikkiTaso');
 
-    clickButton.addEventListener('click', () => {
-        points += pointsPerClick;
-        pointsDisplay.textContent = `Pisteet: ${points}`;
-    });
+function päivitäPisteet() {
+    pisteetElementti.textContent = `Pisteet: ${pisteet}`;
+}
 
-    upgradeClickButton.addEventListener('click', () => {
-        if (points >= 25) {
-            points -= 25;
-            pointsPerClick += 1;
-            clickLevel += 1;
-            pointsDisplay.textContent = `Pisteet: ${points}`;
-            pointsPerClickDisplay.textContent = `Pisteet per klikki: ${pointsPerClick}`;
-            clickLevelDisplay.textContent = `Klikin taso: ${clickLevel}`;
-        }
-    });
+function päivitäTasoTekstit() {
+    kehitäTasoElementti.textContent = `Klikin taso: ${pisteetPerKlikki}`;
+    autoklikkiTasoElementti.textContent = `Autoklikin taso: ${autoklikinTaso}`;
+    pisteetPerKlikkiElementti.textContent = `Pisteet per klikki: ${pisteetPerKlikki}`;
+}
 
-    autoClickButton.addEventListener('click', () => {
-        if (points >= 50) {
-            points -= 50;
-            autoClickLevel += 1;
-            pointsDisplay.textContent = `Pisteet: ${points}`;
-            autoClickLevelDisplay.textContent = `Autoklikin taso: ${autoClickLevel}`;
-            setInterval(() => {
-                points += autoClickLevel;
-                pointsDisplay.textContent = `Pisteet: ${points}`;
-            }, 1000);
-        }
-    });
+klikkaaNappi.addEventListener('click', () => {
+    pisteet += pisteetPerKlikki;
+    päivitäPisteet();
 });
+
+kehitäKlikkiNappi.addEventListener('click', () => {
+    if (pisteetPerKlikki >= maksimiKlikkiTaso) {
+        alert("Klikki on jo maksimitasolla!");
+        return;
+    }
+    if (pisteet >= kehitäKlikkiHinta) {
+        pisteet -= kehitäKlikkiHinta;
+        pisteetPerKlikki += 1;
+        kehitäKlikkiHinta = Math.ceil(kehitäKlikkiHinta * 2.0);
+        kehitäKlikkiNappi.textContent = `Kehitä klikki (${kehitäKlikkiHinta} pistettä)`;
+        päivitäPisteet();
+        päivitäTasoTekstit();
+    } else {
+        alert("Ei tarpeeksi pisteitä!");
+    }
+});
+
+kehitäAutoklikkiNappi.addEventListener('click', () => {
+    if (autoklikinTaso >= maksimiAutoklikkiTaso) {
+        alert("Autoklikki on jo maksimitasolla!");
+        return;
+    }
+    if (pisteet >= kehitäAutoklikkiHinta) {
+        pisteet -= kehitäAutoklikkiHinta;
+        autoklikinTaso++;
+        autoklikkiAika = 1000 / autoklikinTaso; 
+        kehitäAutoklikkiHinta = Math.ceil(kehitäAutoklikkiHinta * 2.0);
+        kehitäAutoklikkiNappi.textContent = `Kehitä autoklikki (${kehitäAutoklikkiHinta} pistettä)`;
+        clearInterval(autoklikkiInterval);
+        käynnistäAutoklikki();
+        päivitäPisteet();
+        päivitäTasoTekstit();
+    } else {
+        alert("Ei tarpeeksi pisteitä!");
+    }
+});
+
+function käynnistäAutoklikki() {
+    autoklikkiInterval = setInterval(() => {
+        pisteet += pisteetPerKlikki;
+        päivitäPisteet();
+    }, autoklikkiAika);
+}
+
+päivitäPisteet();
+päivitäTasoTekstit();
